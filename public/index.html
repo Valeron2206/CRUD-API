@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User CRUD API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2::before {
+            content: '🔧';
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .response-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .response-area.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .response-area.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .users-list {
+            grid-column: span 2;
+        }
+
+        .user-card {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            width: auto;
+            margin: 0;
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.online {
+            background: #28a745;
+        }
+
+        .status-indicator.offline {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .users-list {
+                grid-column: span 1;
+            }
+
+            .user-card {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .user-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="status-indicator" id="statusIndicator">Checking...</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>User CRUD API Tester</h1>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>Create User</h2>
+                <div class="form-group">
+                    <label for="createName">Full Name</label>
+                    <input type="text" id="createName" placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label for="createRole">Role</label>
+                    <input type="text" id="createRole" placeholder="Enter role">
+                </div>
+                <div class="form-group">
+                    <label for="createEfficiency">Efficiency</label>
+                    <input type="number" id="createEfficiency" placeholder="Enter efficiency (0-100)" min="0" max="100">
+                </div>
+                <button class="btn" onclick="createUser()">Create User</button>
+                <div class="response-area" id="createResponse"></div>
+            </div>
+
+            <div class="section">
+                <h2>Get Users</h2>
+                <div class="form-group">
+                    <label for="getUserId">User ID (optional)</label>
+                    <input type="number" id="getUserId" placeholder="Leave empty for all users">
+                </div>
+                <div class="form-group">
+                    <label for="filterRole">Filter by Role</label>
+                    <input type="text" id="filterRole" placeholder="Enter role to filter">
+                </div>
+                <button class="btn btn-secondary" onclick="getUsers()">Get Users</button>
+                <div class="response-area" id="getResponse"></div>
+            </div>
+
+            <div class="section">
+                <h2>Update User</h2>
+                <div class="form-group">
+                    <label for="updateId">User ID</label>
+                    <input type="number" id="updateId" placeholder="Enter user ID">
+                </div>
+                <div class="form-group">
+                    <label for="updateName">Full Name</label>
+                    <input type="text" id="updateName" placeholder="New full name">
+                </div>
+                <div class="form-group">
+                    <label for="updateRole">Role</label>
+                    <input type="text" id="updateRole" placeholder="New role">
+                </div>
+                <div class="form-group">
+                    <label for="updateEfficiency">Efficiency</label>
+                    <input type="number" id="updateEfficiency" placeholder="New efficiency">
+                </div>
+                <button class="btn btn-success" onclick="updateUser()">Update User</button>
+                <div class="response-area" id="updateResponse"></div>
+            </div>
+
+            <div class="section">
+                <h2>Delete User</h2>
+                <div class="form-group">
+                    <label for="deleteId">User ID</label>
+                    <input type="number" id="deleteId" placeholder="Enter user ID (leave empty to delete all)">
+                </div>
+                <button class="btn btn-danger" onclick="deleteUser()">Delete User</button>
+                <button class="btn btn-danger" onclick="deleteAllUsers()">Delete All Users</button>
+                <div class="response-area" id="deleteResponse"></div>
+            </div>
+
+            <div class="section users-list">
+                <h2>Users List</h2>
+                <button class="btn" onclick="refreshUsers()">Refresh Users</button>
+                <div id="usersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+
+        // Check server status
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                const indicator = document.getElementById('statusIndicator');
+                if (data.status === 'OK') {
+                    indicator.textContent = 'Server Online';
+                    indicator.className = 'status-indicator online';
+                } else {
+                    indicator.textContent = 'Server Error';
+                    indicator.className = 'status-indicator offline';
+                }
+            } catch (error) {
+                const indicator = document.getElementById('statusIndicator');
+                indicator.textContent = 'Server Offline';
+                indicator.className = 'status-indicator offline';
+            }
+        }
+
+        // Create user
+        async function createUser() {
+            const name = document.getElementById('createName').value;
+            const role = document.getElementById('createRole').value;
+            const efficiency = parseInt(document.getElementById('createEfficiency').value);
+            const responseArea = document.getElementById('createResponse');
+
+            if (!name || !role || isNaN(efficiency)) {
+                responseArea.textContent = 'Please fill all fields';
+                responseArea.className = 'response-area error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        full_name: name,
+                        role: role,
+                        efficiency: efficiency
+                    })
+                });
+
+                const data = await response.json();
+                responseArea.textContent = JSON.stringify(data, null, 2);
+                responseArea.className = data.success ? 'response-area success' : 'response-area error';
+
+                if (data.success) {
+                    document.getElementById('createName').value = '';
+                    document.getElementById('createRole').value = '';
+                    document.getElementById('createEfficiency').value = '';
+                    refreshUsers();
+                }
+            } catch (error) {
+                responseArea.textContent = 'Error: ' + error.message;
+                responseArea.className = 'response-area error';
+            }
+        }
+
+        // Get users
+        async function getUsers() {
+            const userId = document.getElementById('getUserId').value;
+            const roleFilter = document.getElementById('filterRole').value;
+            const responseArea = document.getElementById('getResponse');
+
+            let url = `${API_BASE}/get`;
+            if (userId) {
+                url += `/${userId}`;
+            }
+
+            const params = new URLSearchParams();
+            if (roleFilter) {
+                params.append('role', roleFilter);
+            }
+
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                responseArea.textContent = JSON.stringify(data, null, 2);
+                responseArea.className = data.success ? 'response-area success' : 'response-area error';
+            } catch (error) {
+                responseArea.textContent = 'Error: ' + error.message;
+                responseArea.className = 'response-area error';
+            }
+        }
+
+        // Update user
+        async function updateUser() {
+            const id = document.getElementById('updateId').value;
+            const name = document.getElementById('updateName').value;
+            const role = document.getElementById('updateRole').value;
+            const efficiency = document.getElementById('updateEfficiency').value;
+            const responseArea = document.getElementById('updateResponse');
+
+            if (!id) {
+                responseArea.textContent = 'Please enter user ID';
+                responseArea.className = 'response-area error';
+                return;
+            }
+
+            const updateData = {};
+            if (name) updateData.full_name = name;
+            if (role) updateData.role = role;
+            if (efficiency) updateData.efficiency = parseInt(efficiency);
+
+            if (Object.keys(updateData).length === 0) {
+                responseArea.textContent = 'Please enter at least one field to update';
+                responseArea.className = 'response-area error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/update/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+                responseArea.textContent = JSON.stringify(data, null, 2);
+                responseArea.className = data.success ? 'response-area success' : 'response-area error';
+
+                if (data.success) {
+                    document.getElementById('updateId').value = '';
+                    document.getElementById('updateName').value = '';
+                    document.getElementById('updateRole').value = '';
+                    document.getElementById('updateEfficiency').value = '';
+                    refreshUsers();
+                }
+            } catch (error) {
+                responseArea.textContent = 'Error: ' + error.message;
+                responseArea.className = 'response-area error';
+            }
+        }
+
+        // Delete user
+        async function deleteUser() {
+            const id = document.getElementById('deleteId').value;
+            const responseArea = document.getElementById('deleteResponse');
+
+            if (!id) {
+                responseArea.textContent = 'Please enter user ID';
+                responseArea.className = 'response-area error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/delete/${id}`, {
+                    method: 'DELETE',
+                });
+
+                const data = await response.json();
+                responseArea.textContent = JSON.stringify(data, null, 2);
+                responseArea.className = data.success ? 'response-area success' : 'response-area error';
+
+                if (data.success) {
+                    document.getElementById('deleteId').value = '';
+                    refreshUsers();
+                }
+            } catch (error) {
+                responseArea.textContent = 'Error: ' + error.message;
+                responseArea.className = 'response-area error';
+            }
+        }
+
+        // Delete all users
+        async function deleteAllUsers() {
+            const responseArea = document.getElementById('deleteResponse');
+
+            if (!confirm('Are you sure you want to delete ALL users?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/delete`, {
+                    method: 'DELETE',
+                });
+
+                const data = await response.json();
+                responseArea.textContent = JSON.stringify(data, null, 2);
+                responseArea.className = data.success ? 'response-area success' : 'response-area error';
+
+                if (data.success) {
+                    refreshUsers();
+                }
+            } catch (error) {
+                responseArea.textContent = 'Error: ' + error.message;
+                responseArea.className = 'response-area error';
+            }
+        }
+
+        // Refresh users list
+        async function refreshUsers() {
+            const usersList = document.getElementById('usersList');
+
+            try {
+                const response = await fetch(`${API_BASE}/get`);
+                const data = await response.json();
+
+                if (data.success && data.result.users) {
+                    if (data.result.users.length === 0) {
+                        usersList.innerHTML =
+                            '<p style="text-align: center; color: #666; padding: 20px;">No users found</p>';
+                    } else {
+                        usersList.innerHTML = data.result.users.map(user => `
+                            <div class="user-card">
+                                <div class="user-info">
+                                    <h3>${user.full_name}</h3>
+                                    <p><strong>Role:</strong> ${user.role}</p>
+                                    <p><strong>Efficiency:</strong> ${user.efficiency}%</p>
+                                    <p><strong>ID:</strong> ${user.id}</p>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn btn-small btn-success" onclick="editUser(${user.id}, '${user.full_name}', '${user.role}', ${user.efficiency})">Edit</button>
+                                    <button class="btn btn-small btn-danger" onclick="quickDelete(${user.id})">Delete</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    usersList.innerHTML =
+                        '<p style="text-align: center; color: #666; padding: 20px;">Error loading users</p>';
+                }
+            } catch (error) {
+                usersList.innerHTML =
+                    '<p style="text-align: center; color: #666; padding: 20px;">Error loading users</p>';
+            }
+        }
+
+        // Edit user (fill update form)
+        function editUser(id, name, role, efficiency) {
+            document.getElementById('updateId').value = id;
+            document.getElementById('updateName').value = name;
+            document.getElementById('updateRole').value = role;
+            document.getElementById('updateEfficiency').value = efficiency;
+
+            // Scroll to update section
+            document.querySelector('.section:nth-child(3)').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Quick delete
+        async function quickDelete(id) {
+            if (!confirm(`Are you sure you want to delete user ID ${id}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/delete/${id}`, {
+                    method: 'DELETE',
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    refreshUsers();
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            checkStatus();
+            refreshUsers();
+
+            // Check status every 30 seconds
+            setInterval(checkStatus, 30000);
+        });
+    </script>
+</body>
+
+</html>
