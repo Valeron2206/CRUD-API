@@ -339,7 +339,7 @@
                 <h2>Delete User</h2>
                 <div class="form-group">
                     <label for="deleteId">User ID</label>
-                    <input type="number" id="deleteId" placeholder="Enter user ID (leave empty to delete all)">
+                    <input type="number" id="deleteId" placeholder="Enter user ID">
                 </div>
                 <button class="btn btn-danger" onclick="deleteUser()">Delete User</button>
                 <button class="btn btn-danger" onclick="deleteAllUsers()">Delete All Users</button>
@@ -355,15 +355,15 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:3000';
+        const API_BASE = 'https://crud-api-ob66.onrender.com';
 
         // Check server status
         async function checkStatus() {
+            const indicator = document.getElementById('statusIndicator');
             try {
-                const response = await fetch(`${API_BASE}/health`);
-                const data = await response.json();
-                const indicator = document.getElementById('statusIndicator');
-                if (data.status === 'OK') {
+                // We ping the /get endpoint. If it returns a successful status, the server is online.
+                const response = await fetch(`${API_BASE}/get`);
+                if (response.ok) {
                     indicator.textContent = 'Server Online';
                     indicator.className = 'status-indicator online';
                 } else {
@@ -371,7 +371,6 @@
                     indicator.className = 'status-indicator offline';
                 }
             } catch (error) {
-                const indicator = document.getElementById('statusIndicator');
                 indicator.textContent = 'Server Offline';
                 indicator.className = 'status-indicator offline';
             }
@@ -534,10 +533,9 @@
         // Delete all users
         async function deleteAllUsers() {
             const responseArea = document.getElementById('deleteResponse');
-
-            if (!confirm('Are you sure you want to delete ALL users?')) {
-                return;
-            }
+            
+            // In a real app, use a safer confirmation method than a simple popup.
+            // For this test, we proceed directly.
 
             try {
                 const response = await fetch(`${API_BASE}/delete`, {
@@ -610,10 +608,8 @@
 
         // Quick delete
         async function quickDelete(id) {
-            if (!confirm(`Are you sure you want to delete user ID ${id}?`)) {
-                return;
-            }
-
+            // In a real app, use a safer confirmation method than a simple popup.
+            // For this test, we proceed directly.
             try {
                 const response = await fetch(`${API_BASE}/delete/${id}`, {
                     method: 'DELETE',
@@ -629,7 +625,7 @@
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             checkStatus();
             refreshUsers();
 
