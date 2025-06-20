@@ -23,8 +23,8 @@
 
 1.  **Клонируйте репозиторий:**
     ```bash
-    git clone <URL вашего репозитория>
-    cd <имя папки проекта>
+    git clone https://github.com/Valeron2206/CRUD-API.git
+    cd CRUD-API
     ```
 
 2.  **Установите зависимости:**
